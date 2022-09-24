@@ -15,7 +15,7 @@ export class NoteController {
 
 	@Get('/stats')
 	async getDataStatistic() {
-
+		return await this.noteService.getStat();
 	}
 
 	@Post()
@@ -33,12 +33,12 @@ export class NoteController {
 			state: NoteState.active
 		}
 
-		return this.noteService.create(newNote)
+		return await this.noteService.create(newNote)
 	}
 
 	@Delete(':id')
 	async remove(@Param('id') id: string) {
-		return await this.noteService.delete(id)
+		await this.noteService.delete(id)
 	}
 
 	@Patch(':id')
