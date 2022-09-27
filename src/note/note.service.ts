@@ -17,7 +17,7 @@ export class NoteService {
 		const newNote: NoteModel = {
 			...dto,
 			id: uuidv4(),
-			created: new Date().toLocaleDateString()
+			created: new Date().toISOString()
 		}
 
 		this.notes.push(newNote);
