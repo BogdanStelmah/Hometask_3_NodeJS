@@ -1,11 +1,21 @@
-import {Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post} from '@nestjs/common';
-import {NoteDto} from "./dto/note.dto";
+import {
+	Body,
+	Controller,
+	Delete,
+	Get,
+	HttpException,
+	HttpStatus,
+	Param,
+	ParseIntPipe,
+	Patch,
+	Post
+} from '@nestjs/common';
+import {CreateNoteDto} from "./dto/create-note.dto";
 import {NoteService} from "./note.service";
 import {CategoryService} from "../category/category.service";
 import {SaveNoteDto} from "./dto/save-note.dto";
 import {dateSearch} from "../utils/utils";
 import {EditNoteDto} from "./dto/edit-note.dto";
-import {NoteState} from "./note.model";
 import {CATEGORY_NOT_FOUND} from "../category/category.constants";
 
 @Controller('notes')
@@ -19,44 +29,41 @@ export class NoteController {
 	}
 
 	@Post()
-	async create(@Body() dto: NoteDto) {
+	async create(@Body() dto: CreateNoteDto) {
 		const category = await this.categoryService.getById(dto.categoryId)
 		if (!category) {
 			throw new HttpException(CATEGORY_NOT_FOUND, HttpStatus.NOT_FOUND)
 		}
 
 		const newNote: SaveNoteDto = {
-			category: category,
+			categoryId: +category.id,
 			content: dto.content,
 			dates: dateSearch(dto.content),
-			name: dto.name,
-			state: NoteState.active
+			name: dto.name
 		}
 
 		return await this.noteService.create(newNote)
 	}
 
 	@Delete(':id')
-	async remove(@Param('id') id: string) {
+	async remove(@Param('id', ParseIntPipe) id: number) {
 		await this.noteService.delete(id)
 	}
 
 	@Patch(':id')
-	async edit(@Param('id') id: string, @Body() dto: EditNoteDto) {
-		const editNote = await this.noteService.getById(id)
-		const category = await this.categoryService.getById(dto.categoryId) || await editNote.category
+	async edit(@Param('id', ParseIntPipe) id: number, @Body() dto: EditNoteDto) {
+		if (dto.categoryId) {
+			const category = await this.categoryService.getById(dto.categoryId)
+			if (!category) {
+				throw new HttpException(CATEGORY_NOT_FOUND, HttpStatus.NOT_FOUND)
+			}
+		}
 
-		editNote.name = dto.name || editNote.name
-		editNote.content = dto.content || editNote.content
-		editNote.category = category
-		editNote.dates = dto.content ? dateSearch(dto.content) : editNote.dates
-		editNote.state = dto.state || editNote.state
-
-		return await this.noteService.edit(editNote)
+		return await this.noteService.edit(id, dto)
 	}
 
 	@Get(':id')
-	async getById(@Param('id') id: string) {
+	async getById(@Param('id', ParseIntPipe) id: number) {
 		return await this.noteService.getById(id)
 	}
 

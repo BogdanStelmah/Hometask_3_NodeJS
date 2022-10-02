@@ -9,7 +9,7 @@ export class EditNoteDto {
 
 	@IsOptional()
 	@IsString()
-	categoryId?: string
+	categoryId?: number
 
 	@IsOptional()
 	@IsString()
