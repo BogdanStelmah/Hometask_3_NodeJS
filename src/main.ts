@@ -9,7 +9,7 @@ async function bootstrap() {
 
   app.enableCors({
       origin: [
-        'http://localhost:3001'
+        process.env.CLIENT_URL || 'http://localhost:3001'
       ],
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
       credentials: true,
